@@ -1,0 +1,44 @@
+name: ML2 CI Pipeline
+
+# Trigger workflow on any push or manual trigger
+on:
+  push:
+    branches: ['main', 'dev']  # add other branches if needed
+  workflow_dispatch:            # manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Python
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # 4. Print Python info and environment
+      - name: Run basic checks
+        run: |
+          echo "Python version:"
+          python --version
+          echo "Pip version:"
+          pip --version
+          echo "Installed packages:"
+          pip list
+          echo "Workflow is running successfully!"
+
+      # 5. Optional: Test a Python script
+      - name: Run sample script
+        run: |
+          if [ -f test_script.py ]; then python test_script.py; else echo "No test script found."; fi
