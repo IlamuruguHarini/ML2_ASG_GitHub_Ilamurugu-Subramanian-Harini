@@ -24,4 +24,4 @@ jobs:
 
     - name: Run Quality Gate Tests
       run: |
-        tests/test_model.py
+        python tests/test_model.py
