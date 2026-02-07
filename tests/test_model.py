@@ -15,7 +15,8 @@ TARGET_COL = "cnt"
 
 data = pd.read_csv(DATA_PATH)
 
-X = data.drop(columns=[TARGET_COL])
+cols_to_drop = [TARGET_COL, 'dteday'] 
+X = data.drop(columns=cols_to_drop)
 y = data[TARGET_COL]
 
 # LOAD TRAINED MODEL
