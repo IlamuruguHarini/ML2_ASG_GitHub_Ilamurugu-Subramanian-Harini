@@ -133,60 +133,77 @@ DATA_PATH = "data/day_2012.csv"
 TARGET_COL = "cnt"
 
 # 1. LOAD DATA
-data = pd.read_csv(DATA_PATH)
+try:
+    data = pd.read_csv(DATA_PATH)
+except FileNotFoundError:
+    print(f"Error: Data file not found at {DATA_PATH}")
+    exit(1)
 
-# 2. FEATURE ENGINEERING (Must match your training pipeline)
-# Ensure columns used in training are recreated here
+# 2. FEATURE ENGINEERING (Critical for matching the notebook)
+# Convert string date to features if they don't exist
 if 'dteday' in data.columns:
     data['dteday'] = pd.to_datetime(data['dteday'], dayfirst=True)
-    data['mnth'] = data['dteday'].dt.month
-    data['weekday'] = data['dteday'].dt.weekday
+    if 'mnth' not in data.columns: data['mnth'] = data['dteday'].dt.month
+    if 'weekday' not in data.columns: data['weekday'] = data['dteday'].dt.weekday
 
-# Define the exact features used in your MLflow run
+# List must match the EXACT features used during training
 features = [
     'season', 'mnth', 'holiday', 'weekday', 'workingday',
     'weathersit', 'temp', 'atemp', 'hum', 'windspeed'
 ]
+
+# Check if all features exist in the dataframe
+missing_features = [f for f in features if f not in data.columns]
+if missing_features:
+    print(f"Error: Missing features in CSV: {missing_features}")
+    exit(1)
+
 X = data[features]
 y = data[TARGET_COL]
 
-# 3. SPLIT DATA (Replicate the 80/20 split used in training)
+# 3. REPLICATE THE SPLIT (80/20, Random State 42)
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# 4. DYNAMIC BASELINE CALCULATION
-# This replicates your "Linear_Regression_Worse_Performance" run logic:
-# It takes 50% of the training partition to train the baseline.
+# 4. DYNAMIC BASELINE (Matches your MLflow 'Worse Performance' run)
+# Train on 50% of the training set
 X_train_subset, _, y_train_subset, _ = train_test_split(
     X_train, y_train, train_size=0.5, random_state=42
 )
 
-baseline_lr = LinearRegression()
-baseline_lr.fit(X_train_subset, y_train_subset)
+baseline_model = LinearRegression()
+baseline_model.fit(X_train_subset, y_train_subset)
 
-# Evaluate baseline on the test set
-y_baseline_pred = baseline_lr.predict(X_test)
+# Get Baseline RMSE on the 20% test set
+y_baseline_pred = baseline_model.predict(X_test)
 rmse_baseline = root_mean_squared_error(y_test, y_baseline_pred)
 
-# 5. EVALUATE YOUR SAVED MODEL
-trained_model = joblib.load(MODEL_PATH)
-y_model_pred = trained_model.predict(X_test)
-rmse_model = root_mean_squared_error(y_test, y_model_pred)
+# 5. EVALUATE SAVED MODEL
+try:
+    trained_model = joblib.load(MODEL_PATH)
+    
+    # Ensure the model receives columns in the correct order
+    y_pred = trained_model.predict(X_test)
+    rmse_model = root_mean_squared_error(y_test, y_pred)
+except Exception as e:
+    print(f"Error loading or predicting with saved model: {e}")
+    exit(1)
 
 # 6. QUALITY GATE
-# Threshold is 5% better than the dynamic baseline
 threshold = 0.95 * rmse_baseline
 
-print("---")
-print(f"Dynamic Baseline RMSE : {rmse_baseline:.4f}")
-print(f"Trained Model RMSE    : {rmse_model:.4f}")
-print(f"Target Threshold      : {threshold:.4f}")
-print("---")
+print("\n" + "="*35)
+print("     MODEL QUALITY GATE CHECK")
+print("="*35)
+print(f"Baseline RMSE           : {rmse_baseline:.2f}")
+print(f"Trained Model RMSE      : {rmse_model:.2f}")
+print(f"Required Threshold      : {threshold:.2f} (5% better)")
+print("-" * 35)
 
-assert rmse_model <= threshold, (
-    f"QUALITY GATE FAILED: Model RMSE ({rmse_model:.2f}) "
-    f"is not at least 5% better than Baseline RMSE ({rmse_baseline:.2f})"
-)
-
-print("QUALITY GATE PASSED: Model outperformed the dynamic baseline.")
+if rmse_model <= threshold:
+    print("STATUS: QUALITY GATE PASSED")
+else:
+    print("STATUS: QUALITY GATE FAILED")
+    # Using exit(1) makes the CI/CD pipeline fail if the test fails
+    exit(1)
