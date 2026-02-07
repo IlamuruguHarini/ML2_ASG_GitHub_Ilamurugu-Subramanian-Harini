@@ -266,8 +266,11 @@ X_train, X_test, y_train, y_test = train_test_split(
 # =====================
 
 trained_model = joblib.load(MODEL_PATH)
-y_pred = trained_model.predict(X_test)
-rmse_model = np.sqrt(mean_squared_error(y_test, y_pred))
+# y_pred = trained_model.predict(X_test)
+# rmse_model = np.sqrt(mean_squared_error(y_test, y_pred))
+
+y_pred = trained_model.predict(X_test_2012)
+rmse_model = np.sqrt(mean_squared_error(y_test_2012, y_pred))
 
 # =====================
 # 4. BASELINE: LR ON 50% OF TRAINING DATA (MATCH NOTEBOOK "WORSE" RUN)
