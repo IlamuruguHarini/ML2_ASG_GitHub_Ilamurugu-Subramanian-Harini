@@ -122,10 +122,10 @@
 
 import joblib
 import pandas as pd
+import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-import numpy as np
 
 # =====================
 # CONFIGURATION
@@ -152,7 +152,7 @@ X = data[features]
 y = data[TARGET_COL]
 
 # =====================
-# 2. REPLICATE TRAIN / TEST SPLIT (80 / 20)
+# 2. TRAIN / TEST SPLIT (80 / 20)
 # =====================
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -167,7 +167,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 trained_model = joblib.load(MODEL_PATH)
 
 y_pred_model = trained_model.predict(X_test)
-rmse_model = mean_squared_error(y_test, y_pred_model, squared=False)
+rmse_model = np.sqrt(mean_squared_error(y_test, y_pred_model))
 
 # =====================
 # 4. RECOMPUTE BASELINE (50% TRAINING DATA)
@@ -183,7 +183,7 @@ baseline_model = LinearRegression()
 baseline_model.fit(X_train_subset, y_train_subset)
 
 y_pred_baseline = baseline_model.predict(X_test)
-rmse_baseline = mean_squared_error(y_test, y_pred_baseline, squared=False)
+rmse_baseline = np.sqrt(mean_squared_error(y_test, y_pred_baseline))
 
 # =====================
 # 5. QUALITY GATE
