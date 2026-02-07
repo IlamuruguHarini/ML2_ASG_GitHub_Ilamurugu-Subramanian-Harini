@@ -1,11 +1,12 @@
-name: ML2 Model Quality Gate
+name: ML2 Python Application
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  test:
+  quality-gate:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +23,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Quality Gate Tests
+    - name: Run Quality Gate Test
       run: |
         python tests/test_model.py
