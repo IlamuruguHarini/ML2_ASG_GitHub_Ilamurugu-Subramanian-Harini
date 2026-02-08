@@ -1,0 +1,23 @@
+artifact_path: file:///C:/Users/harin/OneDrive - Ngee Ann Polytechnic/Y2S2/ML2/ASG
+  2/mlruns/1/models/m-f65564f695db40e4860cfdf645160791/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.0
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+mlflow_version: 3.8.1
+model_id: m-f65564f695db40e4860cfdf645160791
+model_size_bytes: 760
+model_uuid: m-f65564f695db40e4860cfdf645160791
+prompts: null
+run_id: 087674e575244cd6880c092f7b96ab88
+utc_time_created: '2026-02-08 09:07:32.568223'
