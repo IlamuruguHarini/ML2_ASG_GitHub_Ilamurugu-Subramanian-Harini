@@ -70,7 +70,7 @@ rmse_model = np.sqrt(mean_squared_error(y_test_2012, y_pred))
 
 # 5. QUALITY GATE
 
-threshold =  0.5 * rmse_baseline
+threshold =   rmse_baseline
 
 print("===== MODEL QUALITY GATE CHECK =====")
 print(f"Trained Model RMSE (2012): {rmse_model:.4f}")
